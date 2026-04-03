@@ -1,0 +1,11 @@
+{
+  "name": "contentcraft-ai",
+  "version": "1.0.0",
+  "description": "AI Powered Digital Marketing Assistant",
+  "scripts": {
+    "install:all": "cd server && npm.cmd install && cd ../client && npm.cmd install",
+    "start:server": "cd server && node server.js",
+    "start:client": "cd client && npm.cmd run dev",
+    "start": "npx.cmd concurrently \"npm.cmd run start:server\" \"npm.cmd run start:client\""
+  }
+}
