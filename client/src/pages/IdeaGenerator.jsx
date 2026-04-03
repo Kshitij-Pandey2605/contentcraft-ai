@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, RefreshCw, Layers } from 'lucide-react';
+import { Lightbulb, RefreshCw, Layers, Sparkles, Send, Target, ChevronRight } from 'lucide-react';
 import { generateIdeas } from '../services/api';
 
 export default function IdeaGenerator() {
@@ -24,102 +24,140 @@ export default function IdeaGenerator() {
         setError(res.error || 'Failed to generate ideas');
       }
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Error connecting to the API backend. Is your server running?');
-      }
+      setError('Error connecting to the API backend. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold font-sans mb-4">Viral Idea Generator</h1>
-        <p className="text-zinc-400">Discover 5 trending, high-potential concepts for your next viral hit. Just enter your niche or basic topic below.</p>
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-6xl mx-auto space-y-12 pb-20"
+    >
+      <div className="text-center max-w-3xl mx-auto space-y-4">
+        <h1 className="text-5xl font-black font-sans tracking-tight">
+          Viral <span className="text-gradient">Idea Engine</span>
+        </h1>
+        <p className="text-zinc-500 text-lg font-medium">Extract high-potential concepts from any niche with our predictive AI model.</p>
         
-        <form onSubmit={fetchIdeas} className="mt-8 flex gap-4">
-          <input 
-            type="text" 
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter your niche (e.g. Sustainable Fashion)"
-            className="flex-1 bg-surfaceAccent border border-white/10 rounded-xl px-6 py-4 focus:outline-none focus:border-primary transition-all text-lg shadow-inner"
-            required
-          />
-          <button 
-            type="submit"
-            disabled={loading || !topic}
-            className="bg-primary hover:bg-primaryHover text-white px-8 rounded-xl font-medium transition-all shadow-[0_0_15px_rgba(59,130,246,0.3)] disabled:opacity-50 flex items-center justify-center min-w-[160px]"
-          >
-            {loading ? <RefreshCw className="animate-spin" /> : 'Discover Ideas'}
-          </button>
-        </form>
-        {error && <p className="text-red-400 mt-4 text-sm">{error}</p>}
+        <div className="pt-8">
+          <form onSubmit={fetchIdeas} className="relative max-w-2xl mx-auto group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-focus-within:opacity-50" />
+            <div className="relative flex gap-2 bg-surface/80 backdrop-blur-2xl p-2 rounded-2xl border border-white/5 shadow-2xl">
+              <div className="flex-1 flex items-center px-4 gap-3">
+                <Target size={20} className="text-zinc-600" />
+                <input 
+                  type="text" 
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="Enter niche (e.g. Fintech, Solopreneurs, Clean Energy...)"
+                  className="w-full bg-transparent border-none py-3 focus:outline-none text-zinc-100 text-lg placeholder:text-zinc-600 font-medium"
+                  required
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={loading || !topic}
+                className="bg-primary hover:bg-primaryHover text-white px-8 rounded-xl font-black tracking-tight transition-all shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center min-w-[160px] group/btn"
+              >
+                {loading ? <RefreshCw className="animate-spin" size={20} /> : <span className="flex items-center gap-2 uppercase tracking-widest text-xs">Explore <Send size={14} className="group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" /></span>}
+              </button>
+            </div>
+          </form>
+          {error && <p className="text-red-400 mt-4 text-sm font-medium animate-bounce-short">⚠️ {error}</p>}
+        </div>
       </div>
 
-      <div className="mt-12">
+      <div className="relative">
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              key="loading"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-48 glass-card animate-pulse bg-surfaceAccent/50" />
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-64 glass-card animate-pulse bg-white/[0.02] border-white/5 rounded-3xl" />
               ))}
             </motion.div>
           ) : ideas.length > 0 ? (
             <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              key="ideas"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {ideas.map((idea, idx) => (
                 <motion.div 
                   key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="glass-card p-6 flex flex-col justify-between group"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05, type: 'spring', damping: 20 }}
+                  className="glass-card p-8 flex flex-col justify-between group hover:border-primary/30 bg-gradient-to-br from-surface to-transparent relative overflow-hidden"
                 >
-                  <div>
-                    <div className="w-10 h-10 rounded-full bg-accent/20 text-accent flex items-center justify-center mb-4">
-                      <Lightbulb size={20} />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-cyan-300 transition-all">{idea.title}</h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed">{idea.description}</p>
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Lightbulb size={80} />
                   </div>
-                  <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-semibold text-primary">
-                    <Layers size={14} />
-                    Format: {idea.format}
+                  
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 border border-primary/20 group-hover:scale-110 transition-transform">
+                      <Sparkles size={24} />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 leading-tight group-hover:text-white transition-colors">
+                      {idea.title}
+                    </h3>
+                    <p className="text-zinc-500 text-sm leading-relaxed font-medium">
+                      {idea.description}
+                    </p>
+                  </div>
+                  
+                  <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between group-hover:border-primary/20 transition-colors">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                      <Layers size={14} className="text-primary" />
+                      {idea.format}
+                    </div>
+                    <div className="text-primary opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all">
+                      <ChevronRight size={18} />
+                    </div>
                   </div>
                 </motion.div>
               ))}
             </motion.div>
           ) : (
             <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="py-20 text-center text-zinc-500 flex flex-col items-center"
+              key="empty"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }}
+              className="py-32 text-center text-zinc-600 flex flex-col items-center glass-card border-dashed border-white/10"
             >
-              <Lightbulb size={64} className="opacity-20 mb-4" />
-              <p>Type a topic above to generate creative ideas</p>
+              <div className="p-8 rounded-full bg-white/[0.01] mb-8 ring-1 ring-white/5 shadow-2xl">
+                <Lightbulb size={64} className="opacity-10" />
+              </div>
+              <h3 className="text-2xl font-bold text-zinc-500 mb-2">Awaiting Inspiration</h3>
+              <p className="max-w-xs mx-auto text-sm leading-relaxed">Type a niche above to unlock hidden viral potential and content strategies.</p>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
       {ideas.length > 0 && !loading && (
-        <div className="flex justify-center mt-8">
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }}
+          className="flex justify-center mt-12"
+        >
           <button 
             onClick={() => fetchIdeas()}
-            className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/[0.04] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:border-white/20 transition-all font-bold tracking-tight active:scale-95"
           >
-            <RefreshCw size={16} /> Regenerate Ideas
+            <RefreshCw size={18} className="text-primary" /> REGENERATE SYSTEM IDEAS
           </button>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

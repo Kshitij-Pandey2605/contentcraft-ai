@@ -9,6 +9,7 @@ import AskAI from './pages/AskAI';
 import IdeaGenerator from './pages/IdeaGenerator';
 import ContentImprover from './pages/ContentImprover';
 import Analytics from './pages/Analytics';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="ideas" element={<IdeaGenerator />} />
           <Route path="improve" element={<ContentImprover />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>
