@@ -67,7 +67,7 @@ Predictive modeling of content performance.
 
 ### **Live URLs**
 - **Production Backend**: [https://contentcraft-ai-m8ek.onrender.com](https://contentcraft-ai-m8ek.onrender.com)
-- **Production Frontend**: [https://contentcraft-ai-kp.vercel.app](https://contentcraft-ai-kp.vercel.app) *(Update this link)*
+- **Production Frontend**: [https://contentcraft-ai-kp.vercel.app](https://contentcraft-ai-snowy.vercel.app/login) *(Update this link)*
 
 ### **Required Environment Variables**
 To run this project locally or in production, you need the following keys in your `.env` file:
