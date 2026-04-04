@@ -44,18 +44,18 @@ export const askQuestion = async (question) => {
   return response.data;
 };
 
-export const generateIdeas = async (topic) => {
-  const response = await api.post('ideas', { topic });
+export const generateIdeas = async (topic, platform) => {
+  const response = await api.post('ideas', { topic, platform });
   return response.data;
 };
 
-export const improveContent = async (content) => {
-  const response = await api.post('improve', { content });
+export const improveContent = async (content, platform) => {
+  const response = await api.post('improve', { content, platform });
   return response.data;
 };
 
-export const getTrends = async (niche, platform) => {
-  const response = await api.get('trends');
+export const getTrends = async (platform) => {
+  const response = await api.get(`trends?platform=${platform || 'Instagram'}`);
   return response.data;
 };
 

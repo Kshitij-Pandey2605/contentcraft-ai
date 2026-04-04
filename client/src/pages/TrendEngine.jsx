@@ -19,8 +19,7 @@ export default function TrendEngine() {
     const fetchTrends = async () => {
       setLoading(true);
       try {
-        const res = await api.get('trends');
-        // Simulate platform-specific filtering for the demo
+        const res = await api.get(`trends?platform=${platform}`);
         const allTrends = res.data.trends || [];
         const filtered = allTrends.filter(t => 
            !searchTerm || t.topic.toLowerCase().includes(searchTerm.toLowerCase())
@@ -28,13 +27,14 @@ export default function TrendEngine() {
         setTrends(filtered);
       } catch (err) {
         console.error('Trend fetch failed', err);
+        toast.error('Could not sync trends.');
       } finally {
-        setTimeout(() => setLoading(false), 800); // Smooth transition
+        setTimeout(() => setLoading(false), 800);
       }
     };
 
     fetchTrends();
-  }, [platform, searchTerm]); // Refetch when platform changes to simulate sync
+  }, [platform, searchTerm]); 
 
   return (
     <div className="space-y-10 pb-16">

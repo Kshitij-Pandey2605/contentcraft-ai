@@ -1,21 +1,21 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
-import TrendEngine from './pages/TrendEngine';
 import ContentGenerator from './pages/ContentGenerator';
-import AskAI from './pages/AskAI';
-import IdeaGenerator from './pages/IdeaGenerator';
 import ContentImprover from './pages/ContentImprover';
+import IdeaGenerator from './pages/IdeaGenerator';
+import TrendEngine from './pages/TrendEngine';
+import AiAssistant from './pages/AiAssistant';
 import Analytics from './pages/Analytics';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
+import AttentionAnalysis from './pages/AttentionAnalysis';
 import AuthPage from './pages/AuthPage';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { PlatformProvider } from './context/PlatformContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import OrbBackground from './components/ui/OrbBackground';
 
 function App() {
   return (
@@ -27,16 +27,21 @@ function App() {
               position="top-right"
               toastOptions={{
                 style: {
-                  background: 'var(--surface)',
-                  color: 'var(--text-main)',
-                  border: '1px solid var(--border-subtle)',
+                  background: 'rgba(15, 23, 42, 0.8)',
+                  color: '#fff',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
                   fontSize: '14px',
                   fontWeight: '600',
+                  backdropFilter: 'blur(16px)',
+                  borderRadius: '16px',
                 },
-                success: { iconTheme: { primary: '#4ade80', secondary: 'var(--surface)' } },
-                error: { iconTheme: { primary: '#f87171', secondary: 'var(--surface)' } }
+                success: { iconTheme: { primary: '#6366f1', secondary: '#0f172a' } },
+                error: { iconTheme: { primary: '#ef4444', secondary: '#0f172a' } }
               }}
             />
+            {/* Global background visual depth */}
+            <OrbBackground />
+            
             <Routes>
               {/* Public Auth Routes */}
               <Route path="/login"  element={<AuthPage initialMode="login" />} />
@@ -45,15 +50,18 @@ function App() {
               {/* Protected Application Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Layout />}>
-                  <Route index          element={<Dashboard />} />
-                  <Route path="trends"  element={<TrendEngine />} />
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
                   <Route path="generate" element={<ContentGenerator />} />
-                  <Route path="ask"     element={<AskAI />} />
-                  <Route path="ideas"   element={<IdeaGenerator />} />
+                  <Route path="assistant" element={<AiAssistant />} />
+                  <Route path="ask-ai" element={<AiAssistant />} />
+                  <Route path="ask" element={<Navigate to="/ask-ai" replace />} />
+                  <Route path="trends" element={<TrendEngine />} />
                   <Route path="improve" element={<ContentImprover />} />
+                  <Route path="ideas" element={<IdeaGenerator />} />
+                  <Route path="attention" element={<AttentionAnalysis />} />
                   <Route path="analytics" element={<Analytics />} />
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="settings" element={<Settings />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Route>
               </Route>
             </Routes>

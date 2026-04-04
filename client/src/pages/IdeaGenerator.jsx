@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, RefreshCw, Layers, Sparkles, Send, Target, ChevronRight } from 'lucide-react';
 import { generateIdeas } from '../services/api';
 import toast from 'react-hot-toast';
+import { usePlatform } from '../context/PlatformContext';
 
 export default function IdeaGenerator() {
   const [topic, setTopic] = useState('');
   const [ideas, setIdeas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { platform } = usePlatform();
 
   const fetchIdeas = async (e) => {
     if (e) e.preventDefault();
@@ -16,7 +18,7 @@ export default function IdeaGenerator() {
     setLoading(true);
     setError('');
     try {
-      const res = await generateIdeas(topic);
+      const res = await generateIdeas(topic, platform);
       if (res.success && res.data?.ideas) {
         setIdeas(res.data.ideas);
         toast.success(`${res.data.ideas.length} ideas generated!`);

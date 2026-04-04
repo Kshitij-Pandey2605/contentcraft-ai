@@ -1,10 +1,37 @@
-[
-  { "id": "tr_1", "topic": "AI Code Assistants", "baseScore": 85, "category": "Tech" },
-  { "id": "tr_2", "topic": "Solo Founder Burnout", "baseScore": 72, "category": "Business" },
-  { "id": "tr_3", "topic": "Micro SaaS Success", "baseScore": 88, "category": "Entrepreneurship" },
-  { "id": "tr_4", "topic": "Dopamine Detox", "baseScore": 65, "category": "Lifestyle" },
-  { "id": "tr_5", "topic": "No-Code Automations", "baseScore": 78, "category": "Tech" },
-  { "id": "tr_6", "topic": "Remote Indie Hacking", "baseScore": 69, "category": "Business" },
-  { "id": "tr_7", "topic": "Cold Email Outreach", "baseScore": 75, "category": "Marketing" },
-  { "id": "tr_8", "topic": "Prompt Engineering Hacks", "baseScore": 92, "category": "Tech" }
-]
+{
+  "Instagram": [
+    { "id": "ig_1", "topic": "Minimalist Home Office", "baseScore": 88, "category": "Lifestyle" },
+    { "id": "ig_2", "topic": "Sustainable Fashion", "baseScore": 75, "category": "Fashion" },
+    { "id": "ig_3", "topic": "Morning Routine 2025", "baseScore": 92, "category": "Wellness" },
+    { "id": "ig_4", "topic": "Dopamine Decor", "baseScore": 68, "category": "Interior" },
+    { "id": "ig_5", "topic": "POV: Solopreneur Life", "baseScore": 82, "category": "Career" }
+  ],
+  "TikTok": [
+    { "id": "tt_1", "topic": "AI Voice Cloning Trends", "baseScore": 95, "category": "Tech" },
+    { "id": "tt_2", "topic": "Quiet Budgeting", "baseScore": 84, "category": "Finance" },
+    { "id": "tt_3", "topic": "Micro-Learning Series", "baseScore": 79, "category": "Education" },
+    { "id": "tt_4", "topic": "Productivity Parallels", "baseScore": 71, "category": "Self-Help" },
+    { "id": "tt_5", "topic": "ASMR Desk Setup", "baseScore": 89, "category": "Tech" }
+  ],
+  "LinkedIn": [
+    { "id": "li_1", "topic": "AI Agents for HR", "baseScore": 91, "category": "Enterprise" },
+    { "id": "li_2", "topic": "The 4-Day Work Week", "baseScore": 88, "category": "Work Culture" },
+    { "id": "li_3", "topic": "Personal Branding tips", "baseScore": 76, "category": "Growth" },
+    { "id": "li_4", "topic": "B2B SaaS Growth Hacks", "baseScore": 83, "category": "Startup" },
+    { "id": "li_5", "topic": "Fractional CMO rise", "baseScore": 65, "category": "Career" }
+  ],
+  "YouTube": [
+    { "id": "yt_1", "topic": "Video Essay: The Death of TV", "baseScore": 94, "category": "Culture" },
+    { "id": "yt_2", "topic": "Building a SaaS in 24h", "baseScore": 89, "category": "Dev" },
+    { "id": "yt_3", "topic": "Deep Dive into LLMs", "baseScore": 81, "category": "AI" },
+    { "id": "yt_4", "topic": "Documentary: Cyber Survival", "baseScore": 73, "category": "Tech" },
+    { "id": "yt_5", "topic": "Vlog: Digital Nomad in Bali", "baseScore": 68, "category": "Travel" }
+  ],
+  "Twitter/X": [
+    { "id": "tw_1", "topic": "AI Hardware War", "baseScore": 96, "category": "Tech" },
+    { "id": "tw_2", "topic": "Ship 30 for 30", "baseScore": 81, "category": "Writing" },
+    { "id": "tw_3", "topic": "Crypto: Layer 2 Season", "baseScore": 77, "category": "Web3" },
+    { "id": "tw_4", "topic": "Solopreneur Stack", "baseScore": 85, "category": "Productivity" },
+    { "id": "tw_5", "topic": "Building in Public", "baseScore": 79, "category": "Startups" }
+  ]
+}

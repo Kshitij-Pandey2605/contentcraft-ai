@@ -109,6 +109,17 @@ exports.login = async (req, res) => {
  */
 exports.updateProfile = async (req, res) => {
   try {
+    // Handle Hackathon Offline Fallback
+    if (req.user._id === 'offline_mock_id_9999') {
+      return sendSuccess(res, {
+        _id: 'offline_mock_id_9999',
+        name: req.body.name || 'Demo User',
+        email: 'demo@contentcraft.ai',
+        preferredPlatform: req.body.preferredPlatform || 'Instagram',
+        token: generateToken('offline_mock_id_9999')
+      });
+    }
+
     const user = await User.findById(req.user._id);
     if (user) {
       user.name = req.body.name || user.name;
@@ -126,6 +137,7 @@ exports.updateProfile = async (req, res) => {
       return sendError(res, 'User not found', 404);
     }
   } catch (error) {
+    console.error('Update Profile Error:', error);
     return sendError(res, error.message, 500);
   }
 };

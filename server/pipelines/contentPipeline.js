@@ -59,18 +59,32 @@ class ContentPipeline {
     
     // Phase 2: Assemble enriched AI Prompt
     const prompt = `
-      You are an elite social media strategist and viral content expert.
-      Analyze this user topic: "${userInput}"
-      Target platform: ${platform}
+      You are an elite Digital Marketing Architect and Viral Content Specialist.
+      Target Topic: "${userInput}"
+      Target Platform: ${platform}
 
-      Return ONLY a valid JSON object (no markdown, no explanation) strictly following this schema:
+      MISSION: Create a high-conversion content package for ${platform} that specifically targets the niche of "${userInput}".
+      - Avoid generic advice. Use specific terms related to "${userInput}".
+      - The Hook must be a scroller-stopper specifically for ${platform}.
+      - The SEO keywords must be high-intent for "${userInput}".
+
+      Return ONLY a valid JSON object strictly following this schema:
       {
-        "title": "A captivating, SEO-optimized title with power words",
-        "hook": "A single irresistible opening sentence that stops scrollers dead",
-        "caption": "A full post body with a strong call-to-action (2-3 paragraphs)",
-        "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"],
-        "seoKeywords": ["keyword1", "keyword2", "keyword3", "keyword4"],
-        "crossPlatformTips": ["Tip for repurposing on TikTok", "Tip for LinkedIn", "Tip for YouTube Shorts"]
+        "title": "High-CTR title for ${userInput} on ${platform}",
+        "hook": "Platform-native scroll-stopping hook for ${userInput}",
+        "caption": "Fully optimized body text with strategic CTAs and platform-native formatting",
+        "hashtags": ["#${userInput.replace(/\s+/g, '').slice(0, 10)}", "#Viral", "#EliteInsights"],
+        "seo": {
+          "primary": "${userInput}",
+          "longTail": ["how to use ${userInput}", "${userInput} tutorial 2025"],
+          "local": ["${userInput} tips", "${userInput} guide"],
+          "intent": "Educational/Growth"
+        },
+        "viralityScore": 92,
+        "targetAudience": "People looking to master ${userInput} on ${platform}",
+        "improvements": ["Optimize keyword density for ${userInput}", "Use a visual pattern interrupt"],
+        "bestTime": "Peak engagement window",
+        "crossPlatformTips": ["Format for LinkedIn Authority", "Cut for TikTok Reels Reach"]
       }
     `;
 
@@ -125,8 +139,22 @@ class ContentPipeline {
           hook: aiGeneratedContent.hook,
           caption: aiGeneratedContent.caption,
           hashtags: aiGeneratedContent.hashtags || [],
-          seoKeywords: aiGeneratedContent.seoKeywords || [],
-          crossPlatformTips: aiGeneratedContent.crossPlatformTips || [],
+          seoKeywords: [
+            aiGeneratedContent.seo?.primary,
+            ...(aiGeneratedContent.seo?.longTail || []),
+            ...(aiGeneratedContent.seo?.local || [])
+          ].filter(Boolean),
+          viralityScore: aiGeneratedContent.viralityScore || viralityData.score,
+          targetAudience: aiGeneratedContent.targetAudience || 'Algorithmically Targeted Niche',
+          contentStrategy: aiGeneratedContent.contentStrategy || 'High-Impact Visual Narrative',
+          platformStrategy: aiGeneratedContent.platformStrategy || `${platform} native engagement loop`,
+          executionPlan: aiGeneratedContent.crossPlatformTips || [
+            `Optimize hook for ${platform} scroll speed`,
+            'Deploy with high-intent SEO tags',
+            'Schedule during peak retention windows',
+            'Engage with top comments in first 60 mins'
+          ],
+          bestTime: aiGeneratedContent.bestTime || strategy.bestTimes[0],
         },
         postingStrategy: {
           platform,
@@ -135,7 +163,7 @@ class ContentPipeline {
           format: strategy.format,
           tips: strategy.tips,
         },
-        insights: `Leveraged ${analysis.semantics.powerWords.length} power words. Virality score: ${viralityData.score}/100 (${viralityData.status}).`,
+        insights: `Strategic alignment for ${platform} optimized. Virality: ${aiGeneratedContent.viralityScore || viralityData.score}/100.`,
       },
     };
   }

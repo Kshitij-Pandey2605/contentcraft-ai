@@ -1,9 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @import "tailwindcss";
 
 /* ─── Single source of truth for all colors ───────────────────────── */
-/* Light mode defaults (applied to :root / no .dark class) */
 :root {
   --bg:             #f8fafc;
   --surface:        #ffffff;
@@ -12,21 +11,31 @@
   --text-main:      #0f172a;
   --text-muted:     #64748b;
   --border-subtle:  #e2e8f0;
+
+  /* Premium Gradients */
+  --grad-start: #3b82f6; /* Blueish */
+  --grad-end: #8b5cf6; /* Purplish */
+  --color-primary: #6366f1;
+  --color-accent: #d946ef;
 }
 
 /* Dark mode overrides (.dark class injected by ThemeContext onto <html>) */
 .dark {
-  --bg:             #030712;
-  --surface:        #111827;
-  --surface-accent: #1f2937;
-  --surface-accent2:#374151;
-  --text-main:      #f9fafb;
-  --text-muted:     #9ca3af;
-  --border-subtle:  #1f2937;
+  --bg:             #020617; /* Very deep slate/blue */
+  --surface:        #0f172a;
+  --surface-accent: #1e293b;
+  --surface-accent2:#334155;
+  --text-main:      #f8fafc;
+  --text-muted:     #94a3b8;
+  --border-subtle:  #1e293b;
+
+  /* Premium Gradients */
+  --grad-start: #6366f1; /* Indigo */
+  --grad-end: #d946ef; /* Fuchsia */
+  --color-primary: #818cf8; /* Lightened for dark mode */
+  --color-accent: #f0abfc;
 }
 
-/* ─── Tailwind v4 @theme — maps utility classes to CSS vars ────────── */
-/* These are CSS custom properties; Tailwind generates utilities from them */
 @theme {
   --color-bg:              var(--bg);
   --color-background:      var(--bg);
@@ -36,71 +45,77 @@
   --color-text-main:       var(--text-main);
   --color-text-muted:      var(--text-muted);
   --color-border-subtle:   var(--border-subtle);
-  --color-primary:         #3b82f6;
-  --color-primaryHover:    #2563eb;
-  --color-accent:          #06b6d4;
-  --font-sans:             'Inter', sans-serif;
+  --color-primary:         #6366f1;
+  --color-primaryHover:    #4f46e5;
+  --color-accent:          #d946ef;
+  --font-sans:             'Outfit', sans-serif;
 }
 
-/* ─── Base styles ────────────────────────────────────────────────────── */
 @layer base {
-  html {
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
     /* smooth color switch on .dark toggle */
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   body {
     background-color: var(--bg);
     color: var(--text-main);
-    font-family: 'Inter', sans-serif;
+    font-family: 'Outfit', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 }
 
-/* ─── Utility classes ────────────────────────────────────────────────── */
 @layer utilities {
-  /* Glass card — adapts to light/dark automatically */
   .glass {
-    background-color: color-mix(in srgb, var(--surface) 80%, transparent);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
+    background-color: color-mix(in srgb, var(--surface) 75%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
     border: 1px solid var(--border-subtle);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    transition: background-color 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
   .glass-card {
-    background-color: var(--surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: 1rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    transition: all 0.25s ease;
+    background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 50%, transparent);
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark .glass-card {
-    background-color: color-mix(in srgb, var(--surface) 80%, transparent);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    background-color: color-mix(in srgb, var(--surface) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-subtle) 30%, transparent);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   }
 
   .glass-card:hover {
-    border-color: rgba(59, 130, 246, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(59,130,246,0.08);
+    border-color: color-mix(in srgb, var(--grad-start) 40%, transparent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--grad-start) 15%, transparent);
   }
 
-  /* Gradient accent text */
   .text-gradient {
-    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Scrollbar */
-  .custom-scrollbar::-webkit-scrollbar       { width: 5px; height: 5px; }
+  .bg-gradient-premium {
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  }
+
+  .custom-scrollbar::-webkit-scrollbar       { width: 6px; height: 6px; }
   .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--border-subtle);
+    background: var(--surface-accent2);
     border-radius: 999px;
   }
 }

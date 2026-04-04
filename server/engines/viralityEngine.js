@@ -1,68 +1,50 @@
 class ViralityEngine {
   calculateScore(analyzerResult) {
-    let score = 50; // Starting baseline
-    const breakdowns = [];
-    const improvements = [];
-
     const { metrics, semantics, readability } = analyzerResult;
 
-    // Evaluate Structural Metrics
-    if (metrics.structure.questions > 0) {
-      score += 5;
-      breakdowns.push('Hooks readers with a clear question.');
-    } else {
-      improvements.push('Add a question in the first 2 lines to bridge curiosity gaps.');
-    }
+    // 1. Calculate Engagement Score (0-100)
+    let engagement = 60; // Base
+    if (metrics.structure.questions > 0) engagement += 10;
+    if (metrics.structure.emojis >= 1 && metrics.structure.emojis <= 3) engagement += 10;
+    engagement += Math.min(20, semantics.powerWords.length * 5);
+    if (readability === 'punchy') engagement += 10;
+    engagement = Math.min(100, engagement);
 
-    if (metrics.structure.emojis >= 1 && metrics.structure.emojis <= 4) {
-      score += 4;
-      breakdowns.push('Optimal emoji density mapping visually pleasing line breaks.');
-    } else if (metrics.structure.emojis > 4) {
-      score -= 3;
-      improvements.push('Too many emojis. It looks spammy. Reduce to 2-3 maximum.');
-    }
+    // 2. Calculate Trend Score (0-100)
+    let trend = 40; // Base
+    trend += Math.min(60, semantics.trendTokens.length * 15);
+    trend = Math.min(100, trend);
 
-    // Evaluate Semantic Power
-    if (semantics.powerWords.length > 0) {
-      score += semantics.powerWords.length * 3;
-      breakdowns.push(`Strong emotional triggers detected (${semantics.powerWords.join(', ')}).`);
-    } else {
-      improvements.push('Inject authoritative Power Words (e.g., "secret", "proven", "blueprint") to trigger FOMO.');
-    }
+    // 3. Calculate SEO Strength (0-100)
+    let seo = 50; // Base
+    if (metrics.length.words > 10 && metrics.length.words < 50) seo += 20;
+    if (semantics.powerWords.length > 2) seo += 15;
+    if (readability !== 'optimal') seo += 10;
+    seo = Math.min(100, seo);
 
-    if (semantics.trendTokens.length > 0) {
-      score += semantics.trendTokens.length * 4;
-      breakdowns.push(`Piggybacking perfectly on high-volume algorithmic trend keywords (${semantics.trendTokens.join(', ')}).`);
-    }
+    // 4. Final Viral Score Formula
+    // viralScore = (engagement * 0.4) + (trend * 0.3) + (seo * 0.3)
+    let score = (engagement * 0.4) + (trend * 0.3) + (seo * 0.3);
+    score = Math.floor(score);
 
-    // Evaluate Length Optimization
-    if (readability === 'punchy') {
-      score += 15;
-      breakdowns.push('Punchy, highly digestible length optimized for scrolling retention.');
-    } else if (readability === 'long-form') {
-      score -= 5;
-      improvements.push('Text exceeds optimal scroll length. Break it into a carousel or Twitter thread.');
-    } else {
-      score += 8;
-      breakdowns.push('Solid medium-form read.');
-    }
+    // Metadata for UI
+    const breakdowns = [
+      `Engagement Factor: ${engagement}% (Structure + Emotional Triggers)`,
+      `Trend Relevance: ${trend}% (Algorithmic Keyword Matching)`,
+      `SEO Strength: ${seo}% (Discoverability & Hook Power)`
+    ];
 
-    // Random engagement luck (Simulating the Algorithm Chaos Factor)
-    const algorithmChaos = Math.floor(Math.random() * 10) - 4; // -4 to +6
-    score += algorithmChaos;
-    
-    if (algorithmChaos > 4) {
-      breakdowns.push('+ Algorithmic Luck Bias (Simulated favorable timing factor).');
-    }
-
-    // Cap bounds mathematically
-    score = Math.max(10, Math.min(99, score));
+    const improvements = [];
+    if (engagement < 70) improvements.push('Add a direct question to the audience.');
+    if (trend < 60) improvements.push('Use more trending industry keywords.');
+    if (seo < 70) improvements.push('Optimize length for better scroll-depth.');
 
     return {
       score,
       status: score >= 85 ? 'Viral' : (score >= 65 ? 'Good' : 'Needs Optimization'),
       breakdowns,
-      improvements
+      improvements,
+      metrics: { engagement, trend, seo }
     };
   }
 }

@@ -7,7 +7,11 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Parses incoming JSON requests
+app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`[API_REQUEST]: ${req.method} ${req.path}`);
+  next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes); // Preserved Custom User JWT Auth

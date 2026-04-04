@@ -32,13 +32,13 @@ import { usePlatform } from '../context/PlatformContext';
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload) return null;
   return (
-    <div className="bg-zinc-900/95 backdrop-blur-xl border border-border-subtle rounded-xl px-4 py-3 shadow-2xl">
-      <p className="text-text-muted text-xs font-medium mb-2">{label}</p>
+    <div className="bg-[var(--surface)]/90 backdrop-blur-xl border border-[var(--border-subtle)] rounded-xl px-4 py-3 shadow-2xl">
+      <p className="text-[var(--text-muted)] text-xs font-medium mb-2">{label}</p>
       {payload.map((entry, i) => (
         <div key={i} className="flex items-center gap-2 text-sm">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-          <span className="text-text-main capitalize">{entry.dataKey}:</span>
-          <span className="text-text-main font-semibold">{entry.value?.toLocaleString()}</span>
+          <span className="text-[var(--text-main)] capitalize font-bold">{entry.dataKey}:</span>
+          <span className="text-[var(--text-main)] font-black">{entry.value?.toLocaleString()}</span>
         </div>
       ))}
     </div>
@@ -46,32 +46,33 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 // â”€â”€ Stat Card Component â”€â”€
-function StatCard({ icon: Icon, label, value, trend, trendUp, color, bgColor, delay }) {
+function StatCard({ icon: Icon, label, value, trend, trendUp, color, delay }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="glass-card p-5 border border-border-subtle group hover:border-white/15 relative overflow-hidden"
+      className="glass-card p-6 relative overflow-hidden group"
     >
-      {/* Glow effect */}
-      <div className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
+      {/* Dynamic Glow */}
+      <div 
+        className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[80px] opacity-10 group-hover:opacity-30 transition-opacity duration-500"
         style={{ backgroundColor: color }}
       />
-      <div className="flex justify-between items-start mb-4 relative z-10">
-        <div className={`p-3 rounded-xl`} style={{ backgroundColor: `${color}15` }}>
+      <div className="flex justify-between items-start mb-6 relative z-10">
+        <div className="p-3 rounded-xl bg-[var(--surface-accent)]">
           <Icon size={20} style={{ color }} />
         </div>
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 ${
+        <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full flex items-center gap-1 ${
           trendUp ? 'text-emerald-400 bg-emerald-400/10' : 'text-red-400 bg-red-400/10'
         }`}>
-          {trendUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+          {trendUp ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
           {trend}
         </span>
       </div>
       <div className="relative z-10">
-        <p className="text-text-muted text-sm font-medium">{label}</p>
-        <h3 className="text-2xl font-bold text-text-main mt-1 tracking-tight">{value}</h3>
+        <p className="text-[var(--text-muted)] text-xs font-black uppercase tracking-widest mb-1">{label}</p>
+        <h3 className="text-3xl font-black text-[var(--text-main)] tracking-tight">{value}</h3>
       </div>
     </motion.div>
   );
@@ -210,8 +211,8 @@ export default function Analytics() {
               className="glass-card p-6 border border-border-subtle"
             >
               <SectionHeader icon={Activity} title="Engagement Timeline" subtitle="Impressions, engagement & clicks over the last 30 days" color="#3b82f6" />
-              <div className="h-[340px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[340px] w-full min-h-[340px]">
+                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                   <AreaChart data={last30Days} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="gradImpressions" x1="0" y1="0" x2="0" y2="1">
@@ -319,8 +320,8 @@ export default function Analytics() {
                 className="lg:col-span-2 glass-card p-6 border border-border-subtle"
               >
                 <SectionHeader icon={Flame} title="Viral Score Distribution" subtitle="Score breakdown across all content" color="#f59e0b" />
-                <div className="h-[220px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[220px] w-full min-h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <BarChart data={viralScoreDistribution} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={true} vertical={false} />
                       <XAxis dataKey="range" stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} />
@@ -407,8 +408,8 @@ export default function Analytics() {
                 className="glass-card p-6 border border-border-subtle"
               >
                 <SectionHeader icon={PieIcon} title="Content Types" subtitle="Distribution by format" color="#8b5cf6" />
-                <div className="h-[240px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[240px] w-full min-h-[240px]">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <PieChart>
                       <Pie
                         data={contentTypeData}
@@ -564,8 +565,8 @@ export default function Analytics() {
                 className="glass-card p-6 border border-border-subtle"
               >
                 <SectionHeader icon={Users} title="Age Demographics" subtitle="Audience age distribution by gender" color="#8b5cf6" />
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[260px] w-full min-h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <BarChart data={audienceAge} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                       <XAxis dataKey="range" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />
@@ -650,8 +651,8 @@ export default function Analytics() {
               className="glass-card p-6 border border-border-subtle"
             >
               <SectionHeader icon={LineChartIcon} title="Traffic & Conversion Timeline" subtitle="Correlating visitor volume with realized revenue (Last 30 Days)" color="#22c55e" />
-              <div className="h-[340px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[340px] w-full min-h-[340px]">
+                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                   <ComposedChart data={business30Days} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="gradUsers" x1="0" y1="0" x2="0" y2="1">
@@ -701,8 +702,8 @@ export default function Analytics() {
                 className="glass-card p-6 border border-border-subtle"
               >
                 <SectionHeader icon={Globe} title="Traffic Acquisition" subtitle="Where your users are coming from" color="#3b82f6" />
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[260px] w-full min-h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <PieChart>
                       <Pie
                         data={trafficSources}
@@ -738,8 +739,8 @@ export default function Analytics() {
                 className="glass-card p-6 border border-border-subtle"
               >
                 <SectionHeader icon={Calendar} title="Weekly Averages" subtitle="Traffic and revenue normalized by day of week" color="#8b5cf6" />
-                <div className="h-[260px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[260px] w-full min-h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%" debounce={50}>
                     <BarChart data={businessWeeklyActivity} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                       <XAxis dataKey="day" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />

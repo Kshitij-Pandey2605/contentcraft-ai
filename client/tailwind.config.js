@@ -4,19 +4,15 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  // darkMode 'class' is handled by ThemeContext injecting .dark onto <html>
   theme: {
     extend: {
-      // DO NOT hardcode background/surface/text here.
-      // All theme colors are driven by CSS variables in index.css
-      // so they respond to .dark class switching.
       colors: {
-        primary: '#3b82f6',
-        primaryHover: '#2563eb',
-        accent: '#06b6d4',
+        primary: '#6366f1',
+        primaryHover: '#4f46e5',
+        accent: '#d946ef',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out',

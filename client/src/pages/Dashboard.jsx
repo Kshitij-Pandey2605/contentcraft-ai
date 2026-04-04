@@ -1,169 +1,208 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import Button from '../components/ui/Button';
-import { 
-  ArrowRight, Sparkles, TrendingUp, MessageSquare, 
-  Activity, Zap, Target, Users, BarChart3, Clock
-} from 'lucide-react';
-import { useUser } from '../context/UserContext';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { Activity, TrendingUp, Zap, Users, Bot } from 'lucide-react';
+import api from '../services/api';
+import toast from 'react-hot-toast';
+import SkeletonLoaders from '../components/ui/SkeletonLoaders';
 import { usePlatform } from '../context/PlatformContext';
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-  const { user } = useUser();
-  const { platform, platformInfo } = usePlatform();
+  const [trends, setTrends] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { platform } = usePlatform();
 
-  const stats = [
-    { label: 'Active Trends', value: '124', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Avg. Virality', value: '84/100', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: 'Potential Reach', value: '2.4M', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Growth Velocity', value: '+12.5%', icon: Activity, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  const chartData = [
+    { name: '00:00', reach: 400, engagement: 240 },
+    { name: '04:00', reach: 300, engagement: 139 },
+    { name: '08:00', reach: 900, engagement: 980 },
+    { name: '12:00', reach: 1480, engagement: 1108 },
+    { name: '16:00', reach: 1890, engagement: 1400 },
+    { name: '20:00', reach: 2390, engagement: 1700 },
+    { name: '23:59', reach: 2100, engagement: 1500 },
   ];
 
-  const quickActions = [
-    { title: 'Generate Content', icon: Sparkles, desc: 'Create viral optimized posts instantly.', path: '/generate', color: 'text-primary' },
-    { title: 'Market Trends', icon: TrendingUp, desc: 'Real-time algorithmic topic analysis.', path: '/trends', color: 'text-accent' },
-    { title: 'Ask AI Expert', icon: MessageSquare, desc: 'Consult with the strategist algorithm.', path: '/ask', color: 'text-purple-500' },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [trendsRes, analyticsRes] = await Promise.all([
+          api.get(`trends?platform=${platform}`),
+          api.get('analytics')
+        ]);
+        setTrends((trendsRes.data.trends || []).slice(0, 5));
+        setAnalytics(analyticsRes.data.data);
+      } catch (err) {
+        toast.error('Failed to sync with marketing nodes');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [platform]);
+
+  if (loading) return <SkeletonLoaders count={4} />;
 
   return (
-    <div className="space-y-10 pb-12">
-      
-      {/* ── Premium Hero Section ── */}
-      <motion.section 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative p-10 lg:p-16 rounded-[2.5rem] bg-surface border border-border-subtle overflow-hidden shadow-2xl"
-      >
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-        
-        <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }} 
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-accent border border-border-subtle text-xs font-black uppercase tracking-[0.2em] text-primary mb-8"
-            >
-              <Zap size={14} fill="currentColor" /> Optimized for {platform} {platformInfo.emoji}
-            </motion.div>
-            
-            <h1 className="text-5xl lg:text-7xl font-black text-text-main leading-[0.95] tracking-tight mb-8">
-              Your <span className="text-gradient">Viral Engine</span> is ready.
-            </h1>
-            
-            <p className="text-lg text-text-muted font-medium mb-10 max-w-lg leading-relaxed">
-              Welcome back, {user?.name || 'Creator'}. You're connected to the Layer-3 Failsafe pipeline. Every content piece is now mathematically optimized for **{platform}** algorithms.
-            </p>
-            
-            <div className="flex flex-wrap items-center gap-4">
-              <Button variant="primary" size="lg" onClick={() => navigate('/generate')} className="px-8 py-6 text-base shadow-xl shadow-primary/20">
-                Launch Content Generator <ArrowRight size={20} />
-              </Button>
-              <Button variant="secondary" size="lg" onClick={() => navigate('/analytics')} className="px-8 py-6 text-base">
-                View Performance
-              </Button>
+    <div className="p-4 md:p-6 max-w-[1600px] mx-auto space-y-8 animate-fade-in relative z-10 w-full h-full">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/5 pb-8">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-4xl font-black tracking-tighter text-white uppercase italic">Strategic Command</h1>
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-400 uppercase tracking-widest animate-pulse">
+              <Activity size={10} /> Live Data Link Active
             </div>
           </div>
-
-          {/* Floating Platform Insight Card */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-            className="glass-card p-8 border-primary/20 relative group"
-          >
-            <div className="absolute top-4 right-4 text-primary opacity-20 group-hover:opacity-100 transition-opacity">
-              <Sparkles size={24} />
-            </div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-4 flex items-center gap-2">
-              <Clock size={12} /> Live Strategy Pulse
-            </p>
-            <h3 className="text-2xl font-black text-text-main mb-6">Current {platform} Focus</h3>
-            <div className="space-y-4">
-              {[
-                { label: 'Optimal Format', value: platform === 'YouTube' ? 'Long-form + Shorts' : platform === 'Instagram' ? 'Reels & Carousels' : 'Thread/Article', icon: Target },
-                { label: 'Active Trend Level', value: 'High (84%)', icon: Activity },
-                { label: 'Peak Engagement', value: '7:00 PM - 9:30 PM', icon: Zap },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-surface-accent border border-border-subtle group-hover:border-primary/30 transition-colors">
-                  <div className="p-2.5 rounded-xl bg-background border border-border-subtle text-primary">
-                    <item.icon size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">{item.label}</p>
-                    <p className="text-sm font-black text-text-main">{item.value}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <p className="text-text-muted font-medium text-sm">Synchronized with global API nodes for real-time market extraction.</p>
         </div>
-      </motion.section>
+        <div className="flex gap-4">
+          <div className="glass-card px-6 py-3 flex flex-col items-end justify-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted">Global Node Status</p>
+            <p className="text-sm font-bold text-white">UPTIME: 99.9%</p>
+          </div>
+        </div>
+      </div>
 
-      {/* ── Stats Carousel ── */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {stats.map((stat, idx) => (
-          <motion.div
-            key={stat.label}
+      {/* Primary Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { title: "Network Impressions", value: analytics?.views?.total?.toLocaleString() || "284k", icon: Users, trend: analytics?.views?.growthPercent || "+12.4%", color: "#3b82f6" },
+          { title: "Conversion Velocity", value: analytics?.engagementRate?.total || "14.8%", icon: Zap, trend: analytics?.engagementRate?.growthPercent || "+5.2%", color: "#8b5cf6" },
+          { title: "Asset Virality", value: analytics?.shares?.total?.toLocaleString() || "88.4", icon: TrendingUp, trend: analytics?.shares?.growthPercent || "Elite", color: "#f59e0b" },
+          { title: "Market Retention", value: analytics?.watchTimeAvg?.total || "22s", icon: Activity, trend: analytics?.watchTimeAvg?.growthPercent || "Stable", color: "#22c55e" }
+        ].map((stat, i) => (
+          <motion.div 
+            key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * idx }}
-            className="glass-card p-6 border-border-subtle hover:border-primary/30 transition-all group"
+            transition={{ delay: i * 0.1 }}
+            className="glass-card p-6 border border-white/5 group hover:border-white/10 transition-all"
           >
-            <div className={`w-12 h-12 rounded-2xl ${stat.bg} ${stat.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-              <stat.icon size={22} />
+            <div className="flex justify-between items-start">
+              <div className="p-3 rounded-2xl bg-surface-accent border border-white/5 group-hover:scale-110 transition-transform">
+                <stat.icon size={20} style={{ color: stat.color }} />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">
+                {stat.trend}
+              </span>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mb-1">{stat.label}</p>
-            <h4 className="text-3xl font-black text-text-main tracking-tighter">{stat.value}</h4>
+            <div className="mt-6">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mb-1">{stat.title}</p>
+              <h3 className="text-4xl font-black text-white tracking-tight">{stat.value}</h3>
+            </div>
           </motion.div>
         ))}
-      </section>
+      </div>
 
-      {/* ── Quick Actions Grid ── */}
-      <section>
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-black text-text-main tracking-tight">Intelligence Map</h2>
-            <p className="text-text-muted font-medium text-sm">Direct access to the core processing modules.</p>
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        {/* Main Performance Graph */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="xl:col-span-3 glass-card p-8 min-h-[500px] flex flex-col border border-white/5"
+        >
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl font-black uppercase tracking-tight text-white mb-1">Global Attention Map</h3>
+              <p className="text-xs text-text-muted font-medium">Predictive engagement distribution across active time zones.</p>
+            </div>
+            <div className="flex gap-4">
+               <div className="flex items-center gap-2">
+                 <div className="w-3 h-3 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--color-primary-rgb),0.5)]" />
+                 <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Network Reach</span>
+               </div>
+               <div className="flex items-center gap-2">
+                 <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                 <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Growth Factor</span>
+               </div>
+            </div>
           </div>
-          <div className="hidden sm:flex gap-2">
-            <div className="w-2 h-2 rounded-full bg-primary" />
-            <div className="w-2 h-2 rounded-full bg-accent" />
-            <div className="w-2 h-2 rounded-full bg-purple-500" />
+          
+          <div className="flex-1 w-full h-[400px] min-h-[400px]">
+             <ResponsiveContainer width="100%" height="100%" debounce={50}>
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorReach" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorEng" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                  <YAxis stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : v} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'rgba(9, 9, 11, 0.9)', borderColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '16px', backdropFilter: 'blur(10px)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)' }}
+                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: '800' }}
+                  />
+                  <Area type="monotone" dataKey="reach" stroke="var(--color-primary)" strokeWidth={4} fillOpacity={1} fill="url(#colorReach)" />
+                  <Area type="monotone" dataKey="engagement" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorEng)" />
+                </AreaChart>
+             </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {quickActions.map((action, idx) => (
-            <motion.div
-              key={action.title}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 + (idx * 0.1) }}
-              onClick={() => navigate(action.path)}
-              className="glass-card p-8 cursor-pointer group hover:bg-surface-accent transition-all relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <action.icon size={80} />
+        {/* Real-time Trend Feed */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="glass-card p-0 flex flex-col h-full border border-white/5 overflow-hidden"
+        >
+          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">Live Trends</h3>
+              <p className="text-[10px] text-text-muted font-bold">Algorithmic Extraction</p>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              <span className="text-[10px] font-black text-red-500 uppercase">Real-time</span>
+            </div>
+          </div>
+          
+          <div className="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+            {trends.length > 0 ? (
+              trends.map((trend, i) => (
+                <motion.div 
+                  key={i} 
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * i }}
+                  className="p-4 rounded-2xl bg-zinc-900/50 border border-white/5 hover:border-primary/30 transition-all group"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors">{trend.topic}</h4>
+                    <span className="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-md uppercase">Hot</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                       <p className="text-[9px] font-black uppercase tracking-widest text-text-muted opacity-60">Algo Score</p>
+                       <p className="text-lg font-black text-white">{trend.score}</p>
+                    </div>
+                    <div className="text-right">
+                       <TrendingUp size={14} className="text-primary ml-auto mb-1" />
+                       <p className="text-[9px] font-black text-text-muted uppercase whitespace-nowrap">{trend.status}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full opacity-30 py-20">
+                 <Bot size={40} className="mb-4 animate-bounce" />
+                 <p className="text-xs font-black uppercase tracking-widest">Scanning Network...</p>
               </div>
-              <div className="w-14 h-14 rounded-2xl bg-surface-accent border border-border-subtle flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                <action.icon size={26} className={action.color} />
-              </div>
-              <h3 className="text-2xl font-black text-text-main mb-3 tracking-tighter group-hover:text-primary transition-colors">{action.title}</h3>
-              <p className="text-text-muted leading-relaxed font-medium text-sm group-hover:text-text-main transition-colors">{action.desc}</p>
-              <div className="mt-8 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                Access Module <ArrowRight size={14} />
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
+            )}
+          </div>
+          <div className="p-4 border-t border-white/5 bg-white/[0.02]">
+            <button className="w-full py-3 rounded-xl bg-surface-accent border border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-text-muted hover:text-white transition-all">
+              View Detailed Analytics
+            </button>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
-
