@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  preferredPlatform: {
+    type: String,
+    default: 'Instagram',
+  },
 }, {
   timestamps: true
 });

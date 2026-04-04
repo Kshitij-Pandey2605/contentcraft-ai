@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const contentRoutes = require('./routes/contentRoutes');
+const pipelineRoutes = require('./routes/pipelineRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
@@ -10,8 +10,8 @@ app.use(cors());
 app.use(express.json()); // Parses incoming JSON requests
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api', contentRoutes);
+app.use('/api/auth', authRoutes); // Preserved Custom User JWT Auth
+app.use('/api', pipelineRoutes);  // New Multi-Tier Failsafe Pipeline
 
 // Simple GET route for browser testing
 app.get('/', (req, res) => {

@@ -83,3 +83,52 @@ export const dashboardStats = [
   { label: 'Avg. Viral Score', value: '88.4', trend: '-1.2%', trendUp: false, color: '#f59e0b' },
   { label: 'Audience Reach', value: '89.4k', trend: '+12.5%', trendUp: true, color: '#8b5cf6' },
 ];
+
+// ── Business / Monetization Programmatic Data ──
+export const business30Days = Array.from({ length: 30 }, (_, i) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (29 - i));
+  const day = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+  
+  // Gradual growth factor (30 days scalar)
+  const growth = 1 + (i * 0.012); 
+  
+  // Weekend drop penalty (traffic drops drastically on weekends for SaaS)
+  const multiplier = isWeekend ? 0.55 : 1.0;
+  
+  // Occasional spike (e.g., day 18 Marketing blast)
+  const isSpike = i === 18 ? 2.8 : (i === 19 ? 1.5 : 1.0);
+  
+  const baseUsers = 400; // Foundational daily active users
+  
+  const users = Math.floor(baseUsers * growth * multiplier * isSpike + Math.random() * 80);
+  const sessions = Math.floor(users * (1.15 + Math.random() * 0.3)); // Avg ~1.3 sessions per user
+  const conversionRate = (1.8 + Math.random() * 1.2) * (isSpike > 1 ? 1.5 : 1.0) * (isWeekend ? 0.8 : 1.0);
+  const revenue = Math.floor(users * (conversionRate / 100) * 85); // Assuming $85 AOV/LTV
+  
+  return {
+    date: day,
+    users,
+    sessions,
+    conversionRate: Number(conversionRate.toFixed(2)),
+    revenue
+  };
+});
+
+export const trafficSources = [
+  { name: 'Organic Search', value: 45, fill: '#3b82f6' },
+  { name: 'Direct Traffic', value: 25, fill: '#8b5cf6' },
+  { name: 'Social Media', value: 20, fill: '#ec4899' },
+  { name: 'Referral', value: 10, fill: '#06b6d4' },
+];
+
+export const businessWeeklyActivity = [
+  { day: 'Mon', revenue: 2420, users: 480 },
+  { day: 'Tue', revenue: 3100, users: 540 },
+  { day: 'Wed', revenue: 2800, users: 510 },
+  { day: 'Thu', revenue: 3500, users: 620 },
+  { day: 'Fri', revenue: 2900, users: 560 },
+  { day: 'Sat', revenue: 1100, users: 280 },
+  { day: 'Sun', revenue: 1400, users: 310 },
+];

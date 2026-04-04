@@ -11,7 +11,7 @@ export const UserProvider = ({ children }) => {
 
   // Load from localStorage on init
   useEffect(() => {
-    const savedUser = localStorage.getItem('cc_user');
+    const savedUser = localStorage.getItem('contentcraft_user');
     const savedProfile = localStorage.getItem('cc_profile');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -25,7 +25,7 @@ export const UserProvider = ({ children }) => {
   const login = (userData) => {
     setUser(userData);
     setIsAuthenticated(true);
-    localStorage.setItem('cc_user', JSON.stringify(userData));
+    localStorage.setItem('contentcraft_user', JSON.stringify(userData));
     // Check if profile exists for this mock user
     const savedProfile = localStorage.getItem(`cc_profile_${userData.email}`);
     setIsProfileComplete(!!savedProfile);
@@ -35,19 +35,34 @@ export const UserProvider = ({ children }) => {
     setUser(userData);
     setIsAuthenticated(true);
     setIsProfileComplete(false);
-    localStorage.setItem('cc_user', JSON.stringify(userData));
+    localStorage.setItem('contentcraft_user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
     setIsProfileComplete(false);
-    localStorage.removeItem('cc_user');
+    localStorage.removeItem('contentcraft_user');
   };
 
   const updateProfile = (profileData) => {
     localStorage.setItem(`cc_profile_${user.email}`, JSON.stringify(profileData));
     setIsProfileComplete(true);
+  };
+
+  const updateUser = async (updateData) => {
+    try {
+      const { data } = await api.put('/auth/profile', updateData);
+      if (data.success) {
+        const updatedUser = { ...user, ...data.data };
+        setUser(updatedUser);
+        localStorage.setItem('contentcraft_user', JSON.stringify(updatedUser));
+        return { success: true };
+      }
+    } catch (err) {
+      console.error('Update User Error:', err);
+      return { success: false, error: err.message };
+    }
   };
 
   const getProfile = () => {
@@ -63,6 +78,7 @@ export const UserProvider = ({ children }) => {
       register, 
       logout,
       updateProfile,
+      updateUser,
       getProfile
     }}>
       {children}

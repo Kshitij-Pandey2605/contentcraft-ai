@@ -10,48 +10,57 @@ import IdeaGenerator from './pages/IdeaGenerator';
 import ContentImprover from './pages/ContentImprover';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Settings from './pages/Settings';
+import AuthPage from './pages/AuthPage';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { PlatformProvider } from './context/PlatformContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Toaster 
-          position="top-right" 
-          toastOptions={{
-            style: {
-              background: '#18181b', // Zinc 900
-              color: '#fff',
-              border: '1px solid #27272a', // Zinc 800
-            },
-            success: { iconTheme: { primary: '#4ade80', secondary: '#18181b' } },
-            error: { iconTheme: { primary: '#f87171', secondary: '#18181b' } }
-          }} 
-        />
-        <Routes>
-          {/* Public Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+    <ThemeProvider>
+      <PlatformProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: 'var(--surface)',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-subtle)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                },
+                success: { iconTheme: { primary: '#4ade80', secondary: 'var(--surface)' } },
+                error: { iconTheme: { primary: '#f87171', secondary: 'var(--surface)' } }
+              }}
+            />
+            <Routes>
+              {/* Public Auth Routes */}
+              <Route path="/login"  element={<AuthPage initialMode="login" />} />
+              <Route path="/signup" element={<AuthPage initialMode="signup" />} />
 
-          {/* Protected Application Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="trends" element={<TrendEngine />} />
-              <Route path="generate" element={<ContentGenerator />} />
-              <Route path="ask" element={<AskAI />} />
-              <Route path="ideas" element={<IdeaGenerator />} />
-              <Route path="improve" element={<ContentImprover />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+              {/* Protected Application Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Layout />}>
+                  <Route index          element={<Dashboard />} />
+                  <Route path="trends"  element={<TrendEngine />} />
+                  <Route path="generate" element={<ContentGenerator />} />
+                  <Route path="ask"     element={<AskAI />} />
+                  <Route path="ideas"   element={<IdeaGenerator />} />
+                  <Route path="improve" element={<ContentImprover />} />
+                  <Route path="analytics" element={<Analytics />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </PlatformProvider>
+    </ThemeProvider>
   );
 }
 

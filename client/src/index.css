@@ -2,50 +2,105 @@
 
 @import "tailwindcss";
 
+/* ─── Single source of truth for all colors ───────────────────────── */
+/* Light mode defaults (applied to :root / no .dark class) */
+:root {
+  --bg:             #f8fafc;
+  --surface:        #ffffff;
+  --surface-accent: #f1f5f9;
+  --surface-accent2:#e2e8f0;
+  --text-main:      #0f172a;
+  --text-muted:     #64748b;
+  --border-subtle:  #e2e8f0;
+}
+
+/* Dark mode overrides (.dark class injected by ThemeContext onto <html>) */
+.dark {
+  --bg:             #030712;
+  --surface:        #111827;
+  --surface-accent: #1f2937;
+  --surface-accent2:#374151;
+  --text-main:      #f9fafb;
+  --text-muted:     #9ca3af;
+  --border-subtle:  #1f2937;
+}
+
+/* ─── Tailwind v4 @theme — maps utility classes to CSS vars ────────── */
+/* These are CSS custom properties; Tailwind generates utilities from them */
 @theme {
-  --color-background: #0a0a0b;
-  --color-surface: #18181b;
-  --color-surfaceAccent: #27272a;
-  --color-primary: #3b82f6;
-  --color-primaryHover: #2563eb;
-  --color-accent: #06b6d4;
-  --font-sans: 'Inter', sans-serif;
+  --color-bg:              var(--bg);
+  --color-background:      var(--bg);
+  --color-surface:         var(--surface);
+  --color-surface-accent:  var(--surface-accent);
+  --color-surface-accent2: var(--surface-accent2);
+  --color-text-main:       var(--text-main);
+  --color-text-muted:      var(--text-muted);
+  --color-border-subtle:   var(--border-subtle);
+  --color-primary:         #3b82f6;
+  --color-primaryHover:    #2563eb;
+  --color-accent:          #06b6d4;
+  --font-sans:             'Inter', sans-serif;
 }
 
+/* ─── Base styles ────────────────────────────────────────────────────── */
 @layer base {
+  html {
+    /* smooth color switch on .dark toggle */
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
   body {
-    @apply bg-background text-zinc-100 font-sans antialiased;
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
+/* ─── Utility classes ────────────────────────────────────────────────── */
 @layer utilities {
+  /* Glass card — adapts to light/dark automatically */
   .glass {
-    @apply bg-surface/60 backdrop-blur-xl border border-white/5 shadow-xl;
+    background-color: color-mix(in srgb, var(--surface) 80%, transparent);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    transition: background-color 0.2s, border-color 0.2s;
   }
-  
+
   .glass-card {
-    @apply bg-surface/40 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg transition-all duration-300;
+    background-color: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: all 0.25s ease;
+  }
+
+  .dark .glass-card {
+    background-color: color-mix(in srgb, var(--surface) 80%, transparent);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
   }
 
   .glass-card:hover {
-    @apply border-white/20 bg-surface/60 shadow-primary/10;
-  }
-  
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300;
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(59,130,246,0.08);
   }
 
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  /* Gradient accent text */
+  .text-gradient {
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
+
+  /* Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar       { width: 5px; height: 5px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-white/20;
+    background: var(--border-subtle);
+    border-radius: 999px;
   }
 }

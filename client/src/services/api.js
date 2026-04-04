@@ -7,6 +7,23 @@ const api = axios.create({
   },
 });
 
+// Add a request interceptor to include the auth token
+api.interceptors.request.use(
+  (config) => {
+    const user = localStorage.getItem('contentcraft_user');
+    if (user) {
+      const { token } = JSON.parse(user);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export const loginUser = async (credentials) => {
   const response = await api.post('auth/login', credentials);
   return response.data;
@@ -38,7 +55,7 @@ export const improveContent = async (content) => {
 };
 
 export const getTrends = async (niche, platform) => {
-  const response = await api.post('trends', { niche, platform });
+  const response = await api.get('trends');
   return response.data;
 };
 

@@ -33,6 +33,7 @@ exports.signup = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        preferredPlatform: user.preferredPlatform,
         token: generateToken(user._id)
       }, 201);
       
@@ -40,12 +41,13 @@ exports.signup = async (req, res) => {
       // Offline / Timeout Fallback Handler 
       if (dbError.message.includes('timed out') || dbError.name === 'MongooseError') {
          console.warn("DB Timeout on Signup. Invoking Offline Fallback for Hackathon.");
-         return sendSuccess(res, {
+          return sendSuccess(res, {
             _id: 'offline_mock_id_9999',
             name: name,
             email: email,
+            preferredPlatform: 'Instagram',
             token: generateToken('offline_mock_id_9999')
-         }, 201);
+          }, 201);
       }
       throw dbError; // If not a timeout, actually throw it
     }
@@ -75,6 +77,7 @@ exports.login = async (req, res) => {
           _id: user._id,
           name: user.name,
           email: user.email,
+          preferredPlatform: user.preferredPlatform,
           token: generateToken(user._id)
         }, 200);
       } else {
@@ -84,12 +87,13 @@ exports.login = async (req, res) => {
        // Offline / Timeout Fallback Handler 
        if (dbError.message.includes('timed out') || dbError.name === 'MongooseError') {
          console.warn("DB Timeout on Login. Invoking Offline Fallback for Hackathon.");
-         return sendSuccess(res, {
+          return sendSuccess(res, {
             _id: 'offline_mock_id_9999',
             name: 'Demo User',
             email: email,
+            preferredPlatform: 'Instagram',
             token: generateToken('offline_mock_id_9999')
-         }, 200);
+          }, 200);
       }
       throw dbError;
     }
@@ -97,5 +101,31 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error('Login Error:', error);
     return sendError(res, error.message || 'Server Error during Login', 500);
+  }
+};
+
+/**
+ * @route PUT /api/auth/profile
+ */
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.preferredPlatform = req.body.preferredPlatform || user.preferredPlatform;
+      
+      const updatedUser = await user.save();
+      return sendSuccess(res, {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        preferredPlatform: updatedUser.preferredPlatform,
+        token: generateToken(updatedUser._id)
+      });
+    } else {
+      return sendError(res, 'User not found', 404);
+    }
+  } catch (error) {
+    return sendError(res, error.message, 500);
   }
 };

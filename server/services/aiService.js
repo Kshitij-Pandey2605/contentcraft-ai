@@ -1,12 +1,7 @@
-const { OpenAI } = require('openai');
 const dotenv = require('dotenv');
+const aiFailsafeEngine = require('../engines/aiFailsafeEngine');
 dotenv.config();
 
-const openai = new OpenAI({
-  // Use Groq API by default if provided, otherwise fallback to OpenAI
-  apiKey: process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY,
-  baseURL: process.env.GROQ_API_KEY ? "https://api.groq.com/openai/v1" : "https://api.openai.com/v1"
-});
 
 // --- NATIVE OFFLINE FALLBACKS FOR HACKATHON STABILITY ---
 const getMockResponse = (systemPrompt) => {
@@ -65,22 +60,14 @@ const getMockResponse = (systemPrompt) => {
 /**
  * Helper to call AI with JSON output enabled + Multi-API Fallback Strategy
  */
-const callOpenAI = async (systemPrompt, userPrompt) => {
+const callAiEngine = async (systemPrompt, userPrompt) => {
+  const combinedContext = `${systemPrompt}\n\nTask:\n${userPrompt}`;
+  const responseText = await aiFailsafeEngine.generateContent(combinedContext);
+  
   try {
-    const response = await openai.chat.completions.create({
-      model: process.env.GROQ_API_KEY ? 'llama-3.3-70b-versatile' : 'gpt-4o',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.8,
-    });
-    
-    return JSON.parse(response.choices[0].message.content);
+    return JSON.parse(responseText);
   } catch (error) {
-    console.warn("Primary AI API Failed, dynamically routing to unified Offline Fallback Handler:", error.message);
-    // Explicit Fallback routing directly to UI
+    console.error("JSON Parse failed for AI response, returning mock data.");
     return getMockResponse(systemPrompt);
   }
 };
@@ -104,7 +91,7 @@ Adopt a platform-specific tone, optimize for high engagement, and sound human.`;
 
   const userPrompt = `Generate a viral post. Topic: ${topic}. Platform: ${platform}. Target Audience: ${audience}.`;
   
-  return await callOpenAI(systemPrompt, userPrompt);
+  return await callAiEngine(systemPrompt, userPrompt);
 };
 
 /**
@@ -118,11 +105,12 @@ You must return your response IN VALID JSON FORMAT ONLY with the following struc
   "actionableSteps": ["step 1", "step 2", "step 3"],
   "proTips": ["tip 1", "tip 2"],
   "mistakesToAvoid": ["mistake 1", "mistake 2"]
-}`;
+}
+Adopt a Senior AI Strategist persona. Answer as if you are a growth hacker.`;
 
   const userPrompt = `A user has asked this marketing question: "${question}". Please provide a helpful answer formatted as JSON.`;
 
-  return await callOpenAI(systemPrompt, userPrompt);
+  return await callAiEngine(systemPrompt, userPrompt);
 };
 
 /**
@@ -144,7 +132,7 @@ Ideas must be innovative, creative, and niche-specific.`;
 
   const userPrompt = `Generate 5 viral content ideas for the topic/niche: ${topic}.`;
 
-  return await callOpenAI(systemPrompt, userPrompt);
+  return await callAiEngine(systemPrompt, userPrompt);
 };
 
 /**
@@ -163,7 +151,7 @@ Add a hook, improve clarity and engagement, and make it more viral.`;
 
   const userPrompt = `Here is the draft content to improve: \n"${content}"\n\nRewrite it to be highly engaging.`;
 
-  return await callOpenAI(systemPrompt, userPrompt);
+  return await callAiEngine(systemPrompt, userPrompt);
 };
 
 /**
@@ -188,5 +176,5 @@ Provide highly precise, data-driven, and algorithm-aware insights acting as a re
 
   const userPrompt = `Analyze the current algorithmic trends and provide a viral strategy for the niche: "${niche}" on the platform: "${platform}".`;
 
-  return await callOpenAI(systemPrompt, userPrompt);
+  return await callAiEngine(systemPrompt, userPrompt);
 };

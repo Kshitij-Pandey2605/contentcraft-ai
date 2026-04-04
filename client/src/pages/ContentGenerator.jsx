@@ -1,222 +1,298 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Copy, Check, TrendingUp, Hash, Layout, Send, Zap, Clock } from 'lucide-react';
-import { generateContent } from '../services/api';
+import {
+  Sparkles, Copy, CheckCircle2, Type, Hash, Loader2,
+  TrendingUp, Clock, Target, Search,
+  Globe, Zap, AlertTriangle, CheckCircle
+} from 'lucide-react';
+import api from '../services/api';
+import toast from 'react-hot-toast';
+import Button from '../components/ui/Button';
+import { usePlatform } from '../context/PlatformContext';
+
+const PLATFORMS = ['Instagram', 'TikTok', 'LinkedIn', 'YouTube', 'Twitter/X'];
+
+// Animated circular virality gauge
+function ViralityGauge({ score, status }) {
+  const radius = 52;
+  const circ = 2 * Math.PI * radius;
+  const fill = (score / 100) * circ;
+
+  const colorMap = {
+    Viral: { stroke: '#10b981', text: 'text-emerald-400', bg: 'bg-emerald-400/10 border-emerald-400/20' },
+    Good:  { stroke: '#3b82f6', text: 'text-blue-400',    bg: 'bg-blue-400/10 border-blue-400/20' },
+    'Needs Optimization': { stroke: '#f59e0b', text: 'text-amber-400', bg: 'bg-amber-400/10 border-amber-400/20' },
+  };
+  const col = colorMap[status] || colorMap['Good'];
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="relative w-36 h-36">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="currentColor" strokeWidth="10" className="text-surface-accent" />
+          <motion.circle
+            cx="60" cy="60" r={radius} fill="none"
+            stroke={col.stroke} strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            initial={{ strokeDashoffset: circ }}
+            animate={{ strokeDashoffset: circ - fill }}
+            transition={{ duration: 1.2, ease: 'easeOut' }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={`text-3xl font-black ${col.text}`}>{score}</span>
+          <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">/ 100</span>
+        </div>
+      </div>
+      <span className={`text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${col.bg} ${col.text}`}>
+        {status}
+      </span>
+    </div>
+  );
+}
 
 export default function ContentGenerator() {
+  const { platform, platformInfo } = usePlatform();
   const [topic, setTopic] = useState('');
-  const [platform, setPlatform] = useState('LinkedIn');
-  const [audience, setAudience] = useState('');
-  
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState('');
+  const [copiedKey, setCopiedKey] = useState(null);
 
   const handleGenerate = async (e) => {
     e.preventDefault();
-    if (!topic || !platform || !audience) return;
-    
-    setLoading(true);
-    setError('');
-    
+    if (!topic.trim()) return toast.error('Please enter a topic first.');
+    setIsLoading(true);
+    setResult(null);
     try {
-      const res = await generateContent({ topic, platform, audience });
-      if (res.success) {
-        setResult(res.data);
-      } else {
-        setError(res.error || 'Failed to generate');
+      const res = await api.post('pipeline/run', { topic, platform });
+      if (res.data?.success) {
+        setResult(res.data.data);
+        toast.success('Viral content generated!');
       }
     } catch (err) {
-      setError('Server error connecting to API');
+      toast.error(err.response?.data?.error || 'Generation failed.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const copyToClipboard = () => {
-    if (!result) return;
-    navigator.clipboard.writeText(result.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copy = (text, key) => {
+    navigator.clipboard.writeText(Array.isArray(text) ? text.join(' ') : text);
+    setCopiedKey(key);
+    toast.success('Copied!');
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  const CopyBtn = ({ val, id }) => (
+    <button onClick={() => copy(val, id)} className="p-1.5 rounded-lg bg-surface-accent border border-border-subtle text-text-muted hover:text-text-main transition-colors active:scale-95">
+      {copiedKey === id ? <CheckCircle2 size={14} className="text-green-500" /> : <Copy size={14} />}
+    </button>
+  );
+
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">Content Generator</h1>
-          <p className="text-zinc-500 mt-2 text-lg">AI-powered viral copywriting for any platform.</p>
+    <div className="w-full max-w-6xl mx-auto space-y-8 pb-12">
+
+      {/* Input Card */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8">
+        <h2 className="text-2xl font-black text-text-main mb-1">AI Content Pipeline</h2>
+        <p className="text-text-muted text-sm font-medium mb-5">
+          Enter your idea — the 3-layer AI engine generates viral content, scores it, and builds a posting strategy.
+        </p>
+        {/* Platform badge */}
+        <div className="flex items-center gap-2 mb-5">
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/20 text-xs font-bold text-primary">
+            <Zap size={11} /> Optimized for {platformInfo?.emoji} {platform}
+          </span>
+          <span className="text-xs text-text-muted">Change platform in the top bar or Settings</span>
         </div>
-      </div>
+        <form onSubmit={handleGenerate} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text" value={topic} onChange={e => setTopic(e.target.value)} disabled={isLoading}
+            placeholder="e.g. How to grow a SaaS from zero to $10k MRR..."
+            className="flex-1 bg-surface-accent border border-border-subtle text-text-main placeholder:text-text-muted rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm font-medium transition-all"
+          />
+          <Button type="submit" variant="primary" disabled={isLoading} className="sm:w-44 text-sm">
+            {isLoading ? <><Loader2 size={15} className="animate-spin" /> Orchestrating…</> : <><Sparkles size={15} /> Generate</>}
+          </Button>
+        </form>
+      </motion.div>
 
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* Left Input Side */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="w-full lg:w-[400px] shrink-0 sticky top-8"
-        >
-          <div className="glass-card p-8 border border-white/5 space-y-6 bg-gradient-to-br from-surface to-surfaceAccent/20">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-2 flex items-center gap-2">
-              <Layout size={14} /> Configuration
-            </h2>
-            <form onSubmit={handleGenerate} className="space-y-5">
-              <div>
-                <label className="block text-sm font-bold mb-2.5 text-zinc-400">Content Topic</label>
-                <input 
-                  type="text" 
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  className="w-full bg-background/50 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-primary transition-all placeholder:text-zinc-600 font-medium"
-                  placeholder="e.g. The future of Remote Work"
-                  required
-                />
+      {/* Skeletons */}
+      <AnimatePresence mode="wait">
+        {isLoading && (
+          <motion.div key="sk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="glass-card h-36 animate-pulse" />
+            ))}
+          </motion.div>
+        )}
+
+        {result && !isLoading && (
+          <motion.div key="results" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
+            {/* ── Row 1: Virality Score + Generated Content ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+              {/* Virality Score Card */}
+              <div className="glass-card p-6 flex flex-col items-center gap-4 lg:col-span-1">
+                <div className="flex items-center gap-2 self-start">
+                  <TrendingUp size={16} className="text-primary" />
+                  <h3 className="font-black text-text-main text-sm uppercase tracking-wider">Virality Score</h3>
+                </div>
+                <ViralityGauge score={result.virality.score} status={result.virality.status} />
+                <p className="text-[11px] text-text-muted text-center font-medium leading-relaxed">{result.insights}</p>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold mb-2.5 text-zinc-400">Target Channel</label>
-                <div className="relative group">
-                  <select 
-                    value={platform}
-                    onChange={(e) => setPlatform(e.target.value)}
-                    className="w-full bg-background/50 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-primary transition-all appearance-none cursor-pointer font-medium"
-                  >
-                    {['LinkedIn', 'Twitter / X', 'Instagram Caption', 'Facebook', 'TikTok Script'].map(p => (
-                      <option key={p} className="bg-surfaceAccent">{p}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold mb-2.5 text-zinc-400">Target Audience</label>
-                <input 
-                  type="text" 
-                  value={audience}
-                  onChange={(e) => setAudience(e.target.value)}
-                  className="w-full bg-background/50 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-primary transition-all placeholder:text-zinc-600 font-medium"
-                  placeholder="e.g. Gen Z Freelancers"
-                  required
-                />
-              </div>
-
-              {error && <p className="text-red-400 text-sm font-medium flex items-center gap-2"><Activity size={12} /> {error}</p>}
-
-              <button 
-                type="submit" 
-                disabled={loading || !topic}
-                className="w-full mt-4 bg-primary hover:bg-primaryHover text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 disabled:opacity-50 flex justify-center items-center gap-3 group"
-              >
-                {loading ? (
-                  <Activity className="animate-spin" size={20} />
-                ) : (
-                  <>
-                    <Sparkles size={20} className="group-hover:rotate-12 transition-transform" /> GENERATE
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </motion.div>
-
-        {/* Right Output Side */}
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex-1 w-full min-h-[600px] h-full pb-10"
-        >
-          <AnimatePresence mode="wait">
-            {!result && !loading ? (
-              <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="h-[600px] flex flex-col items-center justify-center glass-card border-dashed border-white/10 text-zinc-600 bg-white/[0.01]"
-              >
-                <div className="p-6 rounded-full bg-white/[0.02] mb-6">
-                  <Send size={48} className="opacity-20 translate-x-1 -translate-y-1" />
-                </div>
-                <h3 className="text-xl font-bold text-zinc-500">Ready to Create?</h3>
-                <p className="mt-2">Enter your topic and audience to generate viral content.</p>
-              </motion.div>
-            ) : loading ? (
-              <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="h-28 bg-surfaceAccent/30 animate-pulse rounded-3xl"></div>
-                  <div className="h-28 bg-surfaceAccent/30 animate-pulse rounded-3xl"></div>
-                </div>
-                <div className="h-96 bg-surfaceAccent/30 animate-pulse rounded-3xl"></div>
-              </motion.div>
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="space-y-8"
-              >
-                {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="glass-card p-6 flex items-center justify-between border border-emerald-500/20 bg-emerald-500/5 group">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Viral Potential</p>
-                      <p className="text-3xl font-black text-emerald-400 tracking-tight">{result.viralScore}/100</p>
+              {/* Generated Content: Title + Hook */}
+              <div className="lg:col-span-2 grid grid-cols-1 gap-5">
+                {[
+                  { key: 'title', icon: Type, label: 'Viral Title', color: 'text-primary' },
+                  { key: 'hook', icon: Sparkles, label: 'Attention Hook', color: 'text-accent' },
+                ].map(({ key, icon: Icon, label, color }) => (
+                  <div key={key} className="glass-card p-5 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Icon size={14} className={color} />
+                        <span className="text-xs font-black uppercase tracking-widest text-text-muted">{label}</span>
+                      </div>
+                      <CopyBtn val={result.generatedContent[key]} id={key} />
                     </div>
-                    <div className="p-3 bg-emerald-500/10 rounded-2xl group-hover:scale-110 transition-transform">
-                      <TrendingUp className="text-emerald-400" />
-                    </div>
+                    <p className="text-text-main font-semibold text-sm leading-relaxed">{result.generatedContent[key]}</p>
                   </div>
-                  <div className="glass-card p-6 flex items-center justify-between border border-white/5 bg-white/[0.01] group">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-1">Optimal Posting Window</p>
-                      <p className="text-xl font-bold text-zinc-200 mt-1">{result.bestTimeToPost || 'Tuesday at 9AM'}</p>
-                    </div>
-                    <div className="p-3 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform text-zinc-400">
-                      <Clock size={22} />
-                    </div>
-                  </div>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Hooks Selection */}
-                <div className="glass-card p-8 border-white/5 bg-gradient-to-r from-surface to-transparent">
-                  <h3 className="text-xs font-black text-primary mb-5 flex items-center gap-2 uppercase tracking-[0.2em]">
-                    <Zap size={14} /> Attention-Grabbing Hooks
-                  </h3>
-                  <div className="grid gap-3">
-                    {result.hooks?.map((hook, i) => (
-                      <div key={i} className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-primary/40 hover:bg-white/[0.04] transition-all cursor-default text-zinc-300 font-medium">
-                        {hook}
+            {/* ── Row 2: Caption + Breakdowns/Improvements ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Caption */}
+              <div className="glass-card p-5 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Type size={14} className="text-purple-400" />
+                    <span className="text-xs font-black uppercase tracking-widest text-text-muted">Post Caption</span>
+                  </div>
+                  <CopyBtn val={result.generatedContent.caption} id="caption" />
+                </div>
+                <p className="text-text-main text-sm leading-relaxed whitespace-pre-wrap font-medium">{result.generatedContent.caption}</p>
+              </div>
+
+              {/* AI Breakdowns & Improvements */}
+              <div className="glass-card p-5 flex flex-col gap-4">
+                <span className="text-xs font-black uppercase tracking-widest text-text-muted flex items-center gap-2">
+                  <Zap size={13} className="text-amber-400" /> AI Analysis
+                </span>
+                {result.virality.breakdowns?.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-emerald-400">✓ Strengths</p>
+                    {result.virality.breakdowns.map((b, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs text-text-main font-medium">
+                        <CheckCircle size={12} className="text-emerald-500 mt-0.5 shrink-0" />
+                        <span>{b}</span>
                       </div>
                     ))}
                   </div>
-                </div>
-
-                {/* Main Copy Area */}
-                <div className="glass-card p-8 relative group border-white/5 bg-surfaceAccent/10">
-                  <button 
-                    onClick={copyToClipboard}
-                    className="absolute top-8 right-8 p-3 rounded-2xl bg-surfaceAccent border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 shadow-xl"
-                    title="Copy to clipboard"
-                  >
-                    {copied ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
-                  </button>
-                  <h3 className="text-xs font-black text-zinc-500 mb-6 uppercase tracking-[0.2em]">Primary Copy</h3>
-                  <div className="whitespace-pre-wrap text-zinc-200 leading-[1.8] font-sans text-lg selection:bg-primary/30">
-                    {result.content}
+                )}
+                {result.virality.improvements?.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-border-subtle">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-amber-400">⚡ Improvements</p>
+                    {result.virality.improvements.map((imp, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs text-text-main font-medium">
+                        <AlertTriangle size={12} className="text-amber-400 mt-0.5 shrink-0" />
+                        <span>{imp}</span>
+                      </div>
+                    ))}
                   </div>
-                  
-                  <div className="mt-10 flex flex-wrap gap-2 pt-8 border-t border-white/5">
-                    {result.hashtags?.map((tag, i) => (
-                      <span key={i} className="text-xs font-bold px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-xl flex items-center gap-2 hover:bg-primary/20 transition-colors cursor-default">
-                        <Hash size={12} /> {tag.replace('#', '')}
-                      </span>
+                )}
+              </div>
+            </div>
+
+            {/* ── Row 3: Hashtags + SEO Keywords ── */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="glass-card p-5 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Hash size={14} className="text-pink-400" />
+                    <span className="text-xs font-black uppercase tracking-widest text-text-muted">Hashtags</span>
+                  </div>
+                  <CopyBtn val={result.generatedContent.hashtags} id="hashtags" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {result.generatedContent.hashtags?.map(tag => (
+                    <span key={tag} className="text-xs font-bold text-pink-400 bg-pink-400/10 border border-pink-400/20 px-2.5 py-1 rounded-lg">{tag}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="glass-card p-5 flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <Search size={14} className="text-cyan-400" />
+                  <span className="text-xs font-black uppercase tracking-widest text-text-muted">SEO Keywords</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {result.generatedContent.seoKeywords?.map(kw => (
+                    <span key={kw} className="text-xs font-bold text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-2.5 py-1 rounded-lg">{kw}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Row 4: Posting Strategy ── */}
+            {result.postingStrategy && (
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Clock size={16} className="text-primary" />
+                  <h3 className="font-black text-text-main text-sm uppercase tracking-wider">
+                    {result.postingStrategy.platform} Posting Strategy
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-surface-accent rounded-xl p-4 border border-border-subtle">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Best Times</p>
+                    {result.postingStrategy.bestTimes?.map(t => (
+                      <p key={t} className="text-xs font-bold text-text-main">{t}</p>
+                    ))}
+                  </div>
+                  <div className="bg-surface-accent rounded-xl p-4 border border-border-subtle">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Best Days</p>
+                    <p className="text-xs font-bold text-text-main">{result.postingStrategy.bestDays?.join(', ')}</p>
+                  </div>
+                  <div className="bg-surface-accent rounded-xl p-4 border border-border-subtle">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Format Priority</p>
+                    <p className="text-xs font-bold text-text-main">{result.postingStrategy.format}</p>
+                  </div>
+                  <div className="bg-surface-accent rounded-xl p-4 border border-border-subtle">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">Pro Tips</p>
+                    {result.postingStrategy.tips?.map(t => (
+                      <p key={t} className="text-[11px] text-text-muted leading-relaxed">• {t}</p>
                     ))}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
+
+            {/* ── Row 5: Cross-Platform Distribution ── */}
+            {result.generatedContent.crossPlatformTips?.length > 0 && (
+              <div className="glass-card p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Globe size={16} className="text-accent" />
+                  <h3 className="font-black text-text-main text-sm uppercase tracking-wider">Cross-Platform Distribution Strategy</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {result.generatedContent.crossPlatformTips.map((tip, i) => (
+                    <div key={i} className="flex gap-3 p-4 rounded-xl bg-surface-accent border border-border-subtle">
+                      <Target size={14} className="text-accent mt-0.5 shrink-0" />
+                      <p className="text-xs font-medium text-text-main leading-relaxed">{tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

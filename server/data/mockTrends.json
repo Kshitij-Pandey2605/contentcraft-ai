@@ -1,0 +1,10 @@
+[
+  { "id": "tr_1", "topic": "AI Code Assistants", "baseScore": 85, "category": "Tech" },
+  { "id": "tr_2", "topic": "Solo Founder Burnout", "baseScore": 72, "category": "Business" },
+  { "id": "tr_3", "topic": "Micro SaaS Success", "baseScore": 88, "category": "Entrepreneurship" },
+  { "id": "tr_4", "topic": "Dopamine Detox", "baseScore": 65, "category": "Lifestyle" },
+  { "id": "tr_5", "topic": "No-Code Automations", "baseScore": 78, "category": "Tech" },
+  { "id": "tr_6", "topic": "Remote Indie Hacking", "baseScore": 69, "category": "Business" },
+  { "id": "tr_7", "topic": "Cold Email Outreach", "baseScore": 75, "category": "Marketing" },
+  { "id": "tr_8", "topic": "Prompt Engineering Hacks", "baseScore": 92, "category": "Tech" }
+]
